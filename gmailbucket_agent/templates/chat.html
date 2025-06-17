@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Agente de Email</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/templates/css/style.css">
+</head>
+<body>
+    <div class="app-container">
+        <div class="chat-window" id="chat-window">
+             <div class="message agent-message">Olá! Sou seu assistente de e-mail. Como posso ajudar hoje?</div>
+        </div>
+        <div id="upload-section">
+            <form id="upload-form">
+                <label for="file-input">Anexar um arquivo:</label>
+                <input type="file" name="file" id="file-input" required>
+                <button type="submit" class="btn">1. Fazer Upload</button>
+            </form>
+            <div id="upload-result"></div>
+        </div>
+        <div class="input-area">
+            <input type="text" id="chat-input" placeholder="Diga o que precisa...">
+            <button id="send-btn" class="btn">Enviar</button>
+        </div>
+    </div>
+
+    <script src="/templates/js/chat.js"></script>
+</body>
+</html>
