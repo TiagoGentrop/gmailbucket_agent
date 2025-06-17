@@ -4,28 +4,33 @@
 ![FastAPI](https://img.shields.io/badge/FastAPI-0.100%2B-green.svg)
 ![Vertex AI](https://img.shields.io/badge/Vertex%20AI-Gemini-purple.svg)
 
-Este projeto implementa um agente de inteligência artificial conversacional, construído com o modelo Gemini do Google através da Vertex AI. O agente é capaz de entender solicitações em linguagem natural para enviar e-mails, incluindo suporte para anexos, através de uma interface web interativa construída com FastAPI.
+Este projeto implementa um agente de inteligência artificial conversacional, construído com o modelo Gemini do Google através da Vertex AI. O agente é capaz de entender solicitações em linguagem natural para enviar e-mails.
+
+O projeto utiliza uma arquitetura híbrida:
+1.  **`adk-web`**: Fornece uma interface de chat robusta para interagir com o agente.
+2.  **FastAPI**: Um servidor dedicado atua como um microserviço para lidar com o upload de anexos para o Google Cloud Storage.
 
 ## ✨ Features Principais
 
 -   **Envio Conversacional de E-mails:** Instrua o agente a enviar um e-mail para um ou mais destinatários com um assunto e corpo de mensagem específicos.
--   **Suporte a Anexos:** Faça o upload de arquivos que são armazenados no Google Cloud Storage (GCS) e peça ao agente para anexá-los ao e-mail.
--   **Interface Web Interativa:** Um frontend de chat simples e funcional para interagir com o agente.
+-   **Suporte a Anexos:** Um endpoint de API dedicado para fazer o upload de arquivos para o Google Cloud Storage (GCS), que podem ser usados pelo agente.
+-   **Interface Web Gerada:** A interface de chat é servida pela ferramenta `adk-web`.
 -   **Autenticação Segura:** Utiliza o fluxo OAuth 2.0 do Google para autorizar o envio de e-mails de forma segura, sem expor senhas.
 -   **Configuração Flexível:** Usa variáveis de ambiente (`.env`) para gerenciar as configurações do projeto de forma segura.
 
 ## 🚀 Tecnologias Utilizadas
 
--   **Backend:**
+-   **Backend (Lógica do Agente):**
     -   Python
-    -   FastAPI: Para criar o servidor web e as APIs (`/chat`, `/upload`).
-    -   Uvicorn: Como servidor ASGI para rodar a aplicação FastAPI.
 -   **Inteligência Artificial:**
     -   Google Vertex AI
     -   Modelo Gemini
     -   Google Agent Development Kit (ADK)
--   **Frontend:**
-    -   HTML5, CSS3, JavaScript
+-   **Servidor de API (Upload):**
+    -   FastAPI
+    -   Uvicorn
+-   **Servidor e Frontend (Chat):**
+    -   `adk-web`
 -   **Cloud & Autenticação:**
     -   Google Cloud Storage (GCS)
     -   Google OAuth 2.0
@@ -33,24 +38,18 @@ Este projeto implementa um agente de inteligência artificial conversacional, co
 ## 📂 Estrutura do Projeto
 
 ```
-agent_gmailgit/
-├── agent_gmail/
-│   ├── templates/
-│   │   ├── css/
-│   │   │   └── style.css
-│   │   ├── js/
-│   │   │   └── chat.js
-│   │   └── chat.html
-│   ├── tools/
-│   │   └── funcs.py
-│   ├── __init__.py
-│   ├── agent.py
-│   ├── main.py
-│   └── prompt.py
-├── .env
-├── credentials.json
-├── requirements.txt
-└── README.md
+gmailbucket_agent/
+├── tools/
+│   └── funcs.py           # Ferramentas do agente (ex: enviar_email)
+├── agent.py               # Definição principal do Agente Gemini
+├── main.py                # Servidor FastAPI com o endpoint /upload
+└── prompt.py              # Instruções (prompt) para o agente
+
+# Arquivos de configuração na raiz
+.env
+credentials.json
+requirements.txt
+README.md
 ```
 
 ## 🛠️ Configuração e Instalação
@@ -66,8 +65,8 @@ agent_gmailgit/
 
 1.  **Clonar o Repositório**
     ```bash
-    git clone <url-do-seu-repositorio>
-    cd agent_gmailgit
+    git clone [https://github.com/TiagoGentrop/gmailbucket_agent.git](https://github.com/TiagoGentrop/gmailbucket_agent.git)
+    cd gmailbucket_agent
     ```
 
 2.  **Criar e Ativar Ambiente Virtual**
@@ -85,6 +84,9 @@ agent_gmailgit/
     ```
 
 3.  **Instalar as Dependências**
+
+    - Verifique se seu arquivo `requirements.txt` contém `fastapi`, `uvicorn` e `google-adk-web`.
+    - Execute o comando:
     ```bash
     pip install -r requirements.txt
     ```
@@ -92,11 +94,10 @@ agent_gmailgit/
 4.  **Configurar Credenciais do Google**
     -   No Console do Google Cloud, vá para "APIs e Serviços" -> "Credenciais".
     -   Crie uma "ID do cliente OAuth 2.0" do tipo "App da área de trabalho".
-    -   Faça o download do arquivo JSON.
-    -   Renomeie o arquivo para `credentials.json` e coloque-o na pasta raiz do projeto.
+    -   Faça o download do arquivo JSON, renomeie para `credentials.json` e coloque-o na pasta raiz do projeto.
 
 5.  **Configurar o Arquivo `.env`**
-    -   Crie um arquivo chamado `.env` na raiz do projeto.
+    -   Crie um arquivo `.env` na raiz do projeto.
     -   Copie e cole o conteúdo abaixo, substituindo pelos seus valores.
 
     ```ini
@@ -105,34 +106,50 @@ agent_gmailgit/
     GOOGLE_CLOUD_LOCATION="us-central1"
 
     # Caminho completo para o seu bucket e pasta no Google Cloud Storage
-    # Exemplo: gs://meu-bucket-de-anexos/uploads
     GCS_ATTACHMENT_PATH="gs://seu-bucket/sua-pasta-de-anexos"
     ```
 
-## ⚡ Como Executar
+## ⚡ Como Executar (Arquitetura Híbrida)
 
-1.  **Rodar o Servidor**
-    No terminal, a partir da pasta raiz do projeto, execute:
+Este projeto utiliza dois servidores que devem ser executados **simultaneamente**. A melhor forma de fazer isso é usando **dois terminais separados**.
+
+---
+
+### **Terminal 1: Iniciar o Servidor de Upload (FastAPI)**
+
+Este servidor lida apenas com o upload de arquivos para o Google Cloud Storage.
+
+1.  Abra um terminal na pasta raiz do projeto.
+2.  Ative o ambiente virtual (`.\venv\Scripts\activate`).
+3.  Execute o comando:
     ```bash
     python -m gmailbucket_agent.main
     ```
+4.  Este servidor estará rodando na porta `8001` (por padrão). Deixe este terminal aberto.
 
-2.  **Primeira Autenticação (OAuth)**
-    -   Na primeira vez que o agente precisar enviar um e-mail, uma aba do navegador será aberta.
-    -   Faça login com sua conta Google e conceda as permissões.
-    -   Um arquivo `token.json` será criado na raiz do projeto para salvar sua autorização.
+---
 
-3.  **Acessar a Aplicação**
-    -   Abra seu navegador e acesse: `http://localhost:8001`
+### **Terminal 2: Iniciar o Servidor do Agente e Chat (`adk-web`)**
 
-## 🚀 Como Usar
+Este servidor executa o agente e fornece a interface de chat para você interagir.
 
-1.  Acesse a interface de chat no seu navegador.
-2.  **Para enviar um anexo:**
-    -   Use a seção "Anexar um arquivo" para fazer o upload de um arquivo.
-    -   Uma mensagem de sucesso aparecerá com uma sugestão de comando.
-3.  **Para enviar um e-mail:**
-    -   Digite sua solicitação na caixa de texto.
-    -   *Exemplo sem anexo:* `"Enviar um email para fulano@exemplo.com com o assunto 'Reunião' e corpo 'Olá, a reunião está confirmada.'"`
-    -   *Exemplo com anexo:* `"Quero enviar um email com o anexo relatorio.pdf para ciclano@exemplo.com com o assunto 'Relatório Mensal'"`
-    -   Clique em "Enviar" e aguarde a confirmação do agente.
+1.  Abra um **segundo** terminal na pasta raiz do projeto.
+2.  Ative o ambiente virtual (`.\venv\Scripts\activate`).
+3.  Execute o comando:
+    ```bash
+    adk-web
+    ```
+4.  Este servidor estará rodando na porta `8000` (por padrão). Deixe este terminal aberto também.
+
+---
+
+### **Acessando e Usando a Aplicação**
+
+1.  **Acesse a Interface de Chat**
+    -   Para interagir com o agente, abra a URL do servidor `adk-web` no seu navegador: `http://localhost:8080`
+
+2.  **Upload de Arquivos**
+    -   A interface de chat servida pelo `adk-web` está configurada para usar o endpoint de upload (`http://localhost:8001/upload`) fornecido pelo outro servidor (FastAPI). Use a função de upload na interface para enviar seus anexos.
+
+3.  **Interaja com o Agente**
+    -   Converse com o agente para enviar e-mails, mencionando os arquivos que você enviou por upload.
