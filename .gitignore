@@ -1,3 +1,24 @@
+# Ambiente Virtual
+/venv/
+.venv/
+
+# Arquivos de Cache do Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Arquivos de configuração de IDEs
+.vscode/
+.idea/
+
+# Arquivos sensíveis
+.env
+token.json
+credentials.json
+
+# Arquivos de instalação do Python
+*.egg-info/
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
